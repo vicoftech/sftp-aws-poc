@@ -1,5 +1,29 @@
-﻿*
-!.gitignore
-!poc-sftp-pgp/
-!poc-sftp-pgp/terraform.tfstate
+﻿# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+crash.log
+crash.*.log
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Packages / builds
+*.zip
+*.tar
+*.tar.gz
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
