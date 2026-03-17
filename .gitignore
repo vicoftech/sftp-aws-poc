@@ -1,5 +1,22 @@
-﻿*
+﻿# Ignore everything by default
+*
+
+# Allow repo metadata and project folder
 !.gitignore
 !poc-sftp-pgp/
-!poc-sftp-pgp/terraform.tfstate
 
+# But still ignore build/runtime artefacts inside project
+poc-sftp-pgp/.terraform/
+.pnp.*
+node_modules/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.zip
+*.tar
+*.tar.gz
+
+# Keep Terraform state files tracked
+!poc-sftp-pgp/terraform.tfstate
+!poc-sftp-pgp/terraform.tfstate.backup
