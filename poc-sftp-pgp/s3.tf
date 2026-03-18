@@ -108,7 +108,6 @@ resource "aws_s3_bucket_notification" "poc" {
     lambda_function_arn = aws_lambda_function.inbound.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "inbound/"
-    filter_suffix       = ".pgp"
   }
 
   lambda_function {

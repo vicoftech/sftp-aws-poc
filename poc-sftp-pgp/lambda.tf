@@ -42,10 +42,8 @@ resource "aws_lambda_function" "inbound" {
 
   environment {
     variables = {
-      INTERNAL_PRIVATE_KEY_SECRET_ARN = aws_secretsmanager_secret.internal_private.arn
-      EXTERNAL_PUBLIC_KEY_SECRET_ARN  = aws_secretsmanager_secret.external_public.arn
-      S3_BUCKET_NAME                  = aws_s3_bucket.poc.id
-      PGP_PASSPHRASE                  = var.pgp_passphrase
+      KMS_ASYM_KEY_SECRET_ARN = aws_secretsmanager_secret.kms_asymmetric_key.arn
+      S3_BUCKET_NAME          = aws_s3_bucket.poc.id
     }
   }
 
@@ -70,12 +68,8 @@ resource "aws_lambda_function" "outbound" {
 
   environment {
     variables = {
-      EXTERNAL_PUBLIC_KEY_SECRET_ARN  = aws_secretsmanager_secret.external_public.arn
-      INTERNAL_PRIVATE_KEY_SECRET_ARN = aws_secretsmanager_secret.internal_private.arn
-      TRANSFER_FAMILY_ENDPOINT        = aws_transfer_server.poc.endpoint
-      SFTP_USERNAME                   = "external-poc-user"
-      SFTP_PRIVATE_KEY_SECRET_ARN     = aws_secretsmanager_secret.sftp_user_private_key.arn
-      S3_BUCKET_NAME                  = aws_s3_bucket.poc.id
+      KMS_ASYM_KEY_SECRET_ARN = aws_secretsmanager_secret.kms_asymmetric_key.arn
+      S3_BUCKET_NAME          = aws_s3_bucket.poc.id
     }
   }
 

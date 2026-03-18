@@ -164,7 +164,7 @@ resource "aws_iam_role_policy_attachment" "lambda_outbound_basic" {
 
 resource "aws_iam_policy" "lambda_inbound" {
   name        = "poc-lambda-inbound-policy"
-  description = "Permissions for inbound Lambda to decrypt PGP files from S3"
+  description = "Permissions for inbound Lambda to decrypt/encrypt files with KMS from S3"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -186,18 +186,29 @@ resource "aws_iam_policy" "lambda_inbound" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = [
-          aws_secretsmanager_secret.internal_private.arn,
-          aws_secretsmanager_secret.external_public.arn
+          aws_secretsmanager_secret.kms_asymmetric_key.arn
+        ]
+      },
+      # Needed so Secrets Manager can decrypt the secret using its CMK
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = [
+          aws_kms_key.poc.arn
         ]
       },
       {
         Effect = "Allow"
         Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey"
+          "kms:Encrypt",
+          "kms:Decrypt"
         ]
         Resource = [
-          aws_kms_key.poc.arn
+          aws_kms_key.poc_asymmetric.arn
         ]
       },
       {
@@ -222,7 +233,7 @@ resource "aws_iam_role_policy_attachment" "lambda_inbound" {
 
 resource "aws_iam_policy" "lambda_outbound" {
   name        = "poc-lambda-outbound-policy"
-  description = "Permissions for outbound Lambda to encrypt PGP files and send via SFTP"
+  description = "Permissions for outbound Lambda to encrypt files with KMS and write to S3"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -244,18 +255,28 @@ resource "aws_iam_policy" "lambda_outbound" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = [
-          aws_secretsmanager_secret.external_public.arn,
-          aws_secretsmanager_secret.sftp_user_private_key.arn
+          aws_secretsmanager_secret.kms_asymmetric_key.arn
+        ]
+      },
+      # Needed so Secrets Manager can decrypt the secret using its CMK
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = [
+          aws_kms_key.poc.arn
         ]
       },
       {
         Effect = "Allow"
         Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey"
+          "kms:Encrypt"
         ]
         Resource = [
-          aws_kms_key.poc.arn
+          aws_kms_key.poc_asymmetric.arn
         ]
       },
       {
