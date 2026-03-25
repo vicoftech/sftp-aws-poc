@@ -1,0 +1,3 @@
+﻿PAIN_0001 - Identificable - 2026-03-25_11-01-31
+Este es un archivo plano para probar AWS Transfer Family (Fase 1).
+
