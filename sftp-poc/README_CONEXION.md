@@ -62,13 +62,12 @@ aws s3 ls s3://workium-sftp-poc-sftp-poc-dev/outbound/
 ### Fase 2
 
 ```bash
-# Encriptar archivo antes de subir
-gpg --encrypt --recipient <pgp_recipient_id> pain_0001.txt
-# Genera pain_0001.txt.gpg
+# Encriptar archivo antes de subir (POC simple con Base64)
+base64 pain_0001.txt > pain_0001.txt.enc
 
 # Conectar y subir el archivo encriptado
 sftp -i keys/sftp_user_key sftpuser@s-c643d8f6b6dc4bc28.server.transfer.us-east-1.amazonaws.com
-sftp> put pain_0001.txt.gpg
+sftp> put pain_0001.txt.enc
 sftp> bye
 ```
 
@@ -138,9 +137,9 @@ Implementar:
 Antes de continuar con Fase 2, verificar manualmente:
 ✅ Cliente SFTP se conecta al Transfer Family Server
 ✅ pain_0001.txt aparece en s3://<bucket>/inbound/
-✅ pain_0002.txt aparece en s3://<bucket>/outbound/
-✅ pain_0002.txt contiene el texto "[OUTBOUND - procesado por Lambda Fase 1]"
-✅ pain_0002.txt llegó al servidor sftpcloud.io en /upload/
+✅ pain_0002.enc aparece en s3://<bucket>/outbound/
+✅ pain_0002.enc (Base64) decodificado contiene "[OUTBOUND - procesado por Lambda Fase 1]"
+✅ pain_0002.enc llegó al servidor sftpcloud.io en /upload/
 Confirmar antes de continuar con Fase 2.
 ```
 
@@ -148,12 +147,9 @@ Confirmar antes de continuar con Fase 2.
 
 ```
 Implementar Fase 2:
-- terraform/kms.tf
-- terraform/secrets.tf
 - lambdas/inbound/handler_phase2.py
-- lambdas/outbound/handler_phase2.py
 - scripts/test_phase2.sh
-Actualizar lambda_inbound.tf para soportar variable PHASE=2
+Actualizar terraform/lambda_inbound.tf para invocar el handler de Fase 2
 ```
 
 ---
@@ -165,5 +161,5 @@ Actualizar lambda_inbound.tf para soportar variable PHASE=2
 - **Trusted host keys**: Solo incluir la parte `ecdsa-sha2-nistp256 AAAA...` sin el hostname al final.
 - **PEM del conector**: La clave privada PEM se almacena en Secrets Manager como parte del secret del conector (campo `PrivateKey` en el JSON del secreto).
 - **Evento S3 → Lambda**: Los prefijos `inbound/` y `outbound/` deben terminar con `/` en el filter.
-- **Lambda Layer para GPG**: En Fase 2, si `gpg` no está disponible en el runtime de Lambda, crear un Lambda Layer con el binario GPG compilado para Amazon Linux 2.
+- En esta implementación de Fase 2 no se requiere GPG/PGP ni KMS (usa Base64 para simular cifrado en el POC).
 

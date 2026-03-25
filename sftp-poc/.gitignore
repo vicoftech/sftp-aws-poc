@@ -2,3 +2,7 @@ keys/
 .terraform/
 .terraform.lock.hcl
 
+# Estado local de Terraform (no versionar)
+*.tfstate
+*.tfstate.*
+

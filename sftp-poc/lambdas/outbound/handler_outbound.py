@@ -12,8 +12,8 @@ transfer = boto3.client('transfer')
 
 def lambda_handler(event, context):
     """
-    Fase 1 y 2: Toma el archivo de /outbound y lo envía
-    al servidor SFTP externo via Transfer Family Connector.
+    Toma un objeto bajo /outbound/*.enc y lo envía al SFTP externo
+    vía Transfer Family Connector (disparado por notificación S3).
     """
     connector_id = os.environ['CONNECTOR_ID']
     bucket_name = os.environ['BUCKET_NAME']
@@ -30,7 +30,10 @@ def lambda_handler(event, context):
             logger.info(f"Ignorando archivo fuera de outbound/: {key}")
             continue
 
-        filename = key.split('/')[-1]
+        if not key.endswith('.enc'):
+            logger.info(f"Ignorando outbound sin sufijo .enc: {key}")
+            continue
+
         source_path = f"/{bucket}/{key}"
 
         # Para transferencias outbound SFTP usamos SOLO SendFilePaths

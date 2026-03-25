@@ -32,9 +32,14 @@ echo "--- /outbound ---"
 aws s3 ls "s3://${BUCKET_NAME}/outbound/"
 
 echo ""
-echo "📥 Contenido de pain_0002.txt en /outbound:"
-aws s3 cp "s3://${BUCKET_NAME}/outbound/pain_0002.txt" - 2>/dev/null || echo "(archivo aun no disponible)"
+echo "📥 pain_0002.enc en /outbound (Base64); texto decodificado:"
+if aws s3 cp "s3://${BUCKET_NAME}/outbound/pain_0002.enc" /tmp/pain_0002.enc -q 2>/dev/null; then
+  base64 --decode /tmp/pain_0002.enc > /tmp/pain_0002_decrypted.txt
+  cat /tmp/pain_0002_decrypted.txt
+else
+  echo "(archivo aun no disponible)"
+fi
 
 echo ""
-echo "✅ Prueba Fase 1 completada. Verificar en sftpcloud.io que llegó pain_0002.txt"
+echo "✅ Prueba Fase 1 completada. Verificar en sftpcloud.io que llegó pain_0002.enc"
 

@@ -18,3 +18,4 @@ output "connector_id" {
   value       = aws_transfer_connector.sftp_outbound.connector_id
 }
 
+

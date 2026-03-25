@@ -7,7 +7,7 @@ POC de envío y recepción de archivos usando AWS Transfer Family.
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | 1 | Transferencia de archivos planos | ✅ Implementar primero |
-| 2 | Transferencia con encriptación KMS + PGP | ⏸ Después de validar Fase 1 |
+| 2 | Transferencia con encriptación Base64 (POC simple) | ✅ Implementada después de validar Fase 1 |
 
 ## Arquitectura
 
@@ -20,9 +20,10 @@ Cliente SFTP → Transfer Family Server → S3 /inbound/
 
 ### Fase 2
 ```
-Cliente SFTP (archivo .pgp) → Transfer Family Server → S3 /inbound/
-→ Lambda inbound_processor (desencripta PGP) → S3 /outbound/
-→ Lambda outbound_sender (encripta PGP) → Transfer Connector → sftpcloud.io
+Cliente SFTP (archivo *.enc) → Transfer Family Server → S3 /inbound/
+→ Lambda inbound_processor Fase 2 (decodifica Base64 y genera pain_0001_decrypted.txt)
+→ S3 /outbound/ (pain_0002.enc en Base64)
+→ Lambda outbound_sender (transfiere pain_0002.enc) → Transfer Connector → sftpcloud.io
 ```
 
 ## Despliegue Rápido
@@ -72,7 +73,7 @@ sftp-poc/
 - `iam.tf` (role del conector): permisos añadidos para que el conector pueda leer el secret en Secrets Manager (`secretsmanager:GetSecretValue` + decrypt KMS).
 - `lambdas/outbound/handler_outbound.py`: corrección del `start_file_transfer` para transferencias SFTP outbound usando `SendFilePaths` + `RemoteDirectoryPath` (ya no usa `RetrieveFilePaths`).
 - Confirmación end-to-end:
-  - Upload `pain_0001.txt` (SFTP → Transfer Family) genera `pain_0002.txt` en `s3://workium-sftp-poc-sftp-poc-dev/outbound/`
+  - Upload `pain_0001.txt` (SFTP → Transfer Family) genera `pain_0002.enc` (Base64) en `s3://workium-sftp-poc-sftp-poc-dev/outbound/`
   - Transfer Family outbound para ese archivo queda en estado `COMPLETED`.
 
 ## Flujo de validación rápida
@@ -81,6 +82,6 @@ sftp-poc/
 2. Esperar ~15-60s.
 3. Validar:
    - `aws s3 ls s3://workium-sftp-poc-sftp-poc-dev/outbound/`
-   - `pain_0002.txt` contiene la marca `[OUTBOUND - procesado por Lambda Fase 1]`
+   - `pain_0002.enc` es Base64; decodificado incluye `[OUTBOUND - procesado por Lambda Fase 1]`
    - El archivo se transfiere al servidor destino en `/upload/` (sftpcloud.io).
 

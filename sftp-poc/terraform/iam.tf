@@ -225,9 +225,9 @@ resource "aws_iam_role" "lambda_inbound_role" {
 
 data "aws_iam_policy_document" "lambda_inbound_policy" {
   statement {
-    sid     = "InboundRead"
+    sid     = "InboundReadWrite"
     effect  = "Allow"
-    actions = ["s3:GetObject"]
+    actions = ["s3:GetObject", "s3:PutObject"]
     resources = [
       "${aws_s3_bucket.sftp_poc.arn}/inbound/*"
     ]
